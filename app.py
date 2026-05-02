@@ -108,3 +108,8 @@ if uploaded_file is not None:
     st.write(f"- Normal: {prob_normal:.2f}%")
     st.write(f"- Pneumonia: {prob_pneumonia:.2f}%")
     st.write(f"- Invalid / other: {prob_other:.2f}%")
+    if is_invalid:
+        st.caption(
+            "These are softmax shares from the 3-class head. The result above is **not** “pick the largest bar”; "
+            "safety rules (x-ray gate, OTHER mass, medical margin) run on top and can reject the image anyway."
+        )
