@@ -2,7 +2,7 @@
 
 **Course:** SE 3231 - Deep Learning Application
 **Project Category:** Medical Imaging (Transfer Learning)
-**Deadline:** May 4, 2026
+
 
 ## 1. Project Overview
 This project is a Deep Learning application designed to classify pediatric chest X-rays to solve a real-world medical problem. It utilizes **Transfer Learning** on a standard ResNet backbone to predict the probability of Pneumonia versus a Normal scan.
@@ -64,6 +64,10 @@ streamlit run app.py
 
 Streamlit prints a local URL (usually `http://localhost:8501`). Open that link, then upload a chest X-ray (`.jpg`, `.jpeg`, or `.png`).
 
+### Sample images for quick testing
+
+The **`testing-dataset/`** folder holds example images organized like the model’s classes: **`NORMAL/`**, **`PNEUMONIA/`**, and **`OTHER/`** (non–chest-X-ray or anomaly-style samples). After the app is running, pick any file from those subfolders and upload it in Streamlit to try the model without preparing your own images.
+
 To stop the server, press **Ctrl+C** in the terminal.
 
 ---
@@ -102,6 +106,7 @@ pneumonia-detector/
 │   ├── evaluate.py# Confusion matrix and performance metrics
 │   ├── model.py   # Custom architecture design
 │   └── train.py   # Training logic, loss, and optimizer
+├── testing-dataset/  # Sample NORMAL / PNEUMONIA / OTHER images for trying the app
 ├── app.py         # Functional Streamlit UI
 ├── pneumonia_model.pth # Saved model weights
 ├── README.md      # Project documentation
