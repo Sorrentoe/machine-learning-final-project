@@ -9,9 +9,9 @@ class PneumoniaDetector(nn.Module):
     and (2) a binary x-ray gate (chest X-ray vs not-OTHER) trained jointly.
     """
 
-    def __init__(self):
+    def __init__(self, pretrained_backbone: bool = True):
         super().__init__()
-        weights = models.ResNet18_Weights.DEFAULT
+        weights = models.ResNet18_Weights.DEFAULT if pretrained_backbone else None
         backbone = models.resnet18(weights=weights)
         for param in backbone.parameters():
             param.requires_grad = False
@@ -35,8 +35,8 @@ class PneumoniaDetector(nn.Module):
         return logits_3, xray_logit
 
 
-def create_pneumonia_model():
-    return PneumoniaDetector()
+def create_pneumonia_model(pretrained_backbone: bool = True):
+    return PneumoniaDetector(pretrained_backbone=pretrained_backbone)
 
 
 if __name__ == "__main__":

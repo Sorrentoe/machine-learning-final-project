@@ -16,9 +16,13 @@ def evaluate_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Evaluating on device: {device}")
 
-    model = create_pneumonia_model().to(device)
+    model = create_pneumonia_model(pretrained_backbone=False).to(device)
     try:
-        model.load_state_dict(torch.load(_MODEL_PATH, map_location=device))
+        try:
+            ckpt = torch.load(_MODEL_PATH, map_location=device, weights_only=True)
+        except TypeError:
+            ckpt = torch.load(_MODEL_PATH, map_location=device)
+        model.load_state_dict(ckpt)
         print(f"Successfully loaded trained weights from {_MODEL_PATH}")
     except FileNotFoundError:
         print(f"ERROR: model weights not found at {_MODEL_PATH}. Please run train.py first.")

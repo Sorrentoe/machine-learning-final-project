@@ -1,9 +1,13 @@
+from pathlib import Path
+
 import streamlit as st
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 from src.model import create_pneumonia_model
+
+_MODEL_PATH = Path(__file__).resolve().parent / "pneumonia_model.pth"
 
 # --- Decision thresholds (tunable) ---
 # Binary gate: probability the image is a chest X-ray (vs junk) from dedicated head.
@@ -27,8 +31,16 @@ transform = transforms.Compose([
 
 @st.cache_resource
 def load_model():
-    model = create_pneumonia_model()
-    model.load_state_dict(torch.load("pneumonia_model.pth", map_location=torch.device("cpu")))
+    # Match PneumoniaDetector checkpoint (backbone.* / classifier.* / xray_gate.*), not raw ResNet keys.
+    # pretrained_backbone=False: weights come entirely from pneumonia_model.pth (faster Streamlit cold start).
+    model = create_pneumonia_model(pretrained_backbone=False)
+    try:
+        ckpt = torch.load(
+            _MODEL_PATH, map_location=torch.device("cpu"), weights_only=True
+        )
+    except TypeError:
+        ckpt = torch.load(_MODEL_PATH, map_location=torch.device("cpu"))
+    model.load_state_dict(ckpt)
     model.eval()
     return model
 
@@ -44,7 +56,7 @@ uploaded_file = st.file_uploader("Choose an X-ray image...", type=["jpg", "jpeg"
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Uploaded Image", width="stretch")
 
     st.write("Analyzing...")
 
