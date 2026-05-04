@@ -8,11 +8,15 @@ from model import create_pneumonia_model
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Index of OTHER in alphabetized ImageFolder classes: NORMAL, OTHER, PNEUMONIA
+# Index of OTHER in alphabetized ImageFolder classes: NORMAL(0), OTHER(1), PNEUMONIA(2)
 OTHER_CLASS_IDX = 1
 
 
 def _class_weights_from_dataset(train_dataset, num_classes, device):
+    """
+    Compute inverse-frequency weights per class so the weighted CrossEntropyLoss
+    penalises mistakes on rare classes more heavily.
+    """
     counts = Counter(train_dataset.targets)
     total = len(train_dataset)
     weights = [total / (num_classes * counts[i]) for i in range(num_classes)]
@@ -31,6 +35,7 @@ def train_model():
     num_classes = len(classes)
     class_weights = _class_weights_from_dataset(train_dataset, num_classes, device)
 
+    # Log class distribution so imbalance is visible before training starts
     count_normal = sum(1 for t in train_dataset.targets if t == 0)
     count_other = sum(1 for t in train_dataset.targets if t == OTHER_CLASS_IDX)
     count_pneumonia = sum(1 for t in train_dataset.targets if t == 2)
@@ -45,10 +50,12 @@ def train_model():
         f"PNEUMONIA: {class_weights[2].item():.3f}\n"
     )
 
+    # Weighted CE for the 3-class head; BCE for the binary X-ray gate
     criterion_ce = nn.CrossEntropyLoss(weight=class_weights)
     criterion_gate = nn.BCEWithLogitsLoss()
-    gate_loss_weight = 0.5
+    gate_loss_weight = 0.5  # scales the gate loss relative to the CE loss
 
+    # Only the two unfrozen heads are passed to the optimizer
     trainable = list(model.classifier.parameters()) + list(model.xray_gate.parameters())
     optimizer = optim.SGD(trainable, lr=0.001, momentum=0.9)
 
@@ -56,6 +63,7 @@ def train_model():
 
     print("Starting training...")
     for epoch in range(num_epochs):
+        # --- Training phase ---
         model.train()
         running_loss = 0.0
 
@@ -64,6 +72,8 @@ def train_model():
 
             optimizer.zero_grad()
             logits_3, xray_logit = model(images)
+
+            # Gate target: 1 for real X-rays (NORMAL / PNEUMONIA), 0 for OTHER
             is_xray = (labels != OTHER_CLASS_IDX).float()
             loss_ce = criterion_ce(logits_3, labels)
             loss_gate = criterion_gate(xray_logit, is_xray)
@@ -73,6 +83,7 @@ def train_model():
             optimizer.step()
             running_loss += loss.item()
 
+        # --- Validation phase ---
         model.eval()
         val_loss = 0.0
         correct = 0
@@ -101,6 +112,7 @@ def train_model():
               f"Val Loss: {epoch_val_loss:.4f} | "
               f"Val Accuracy: {val_accuracy:.2f}%")
 
+    # Persist only the learned weights (state_dict), not the full model object
     save_path = os.path.join(_PROJECT_ROOT, "pneumonia_model.pth")
     torch.save(model.state_dict(), save_path)
     print(f"\nTraining complete. Model saved to {save_path}")
