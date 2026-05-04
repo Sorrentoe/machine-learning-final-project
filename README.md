@@ -1,7 +1,10 @@
 # 🫁 Medical Imaging: Pneumonia & Anomaly Detector
 
-**Course:** SE 3231 - Deep Learning Application
-**Project Category:** Medical Imaging (Transfer Learning)
+**Course:** SE 3231 - Deep Learning Application  
+
+**Project Category:** Medical Imaging (Transfer Learning)  
+
+**Deployment Link:** https://pneumonia-detector6767.streamlit.app/
 
 
 ## 1. Project Overview
