@@ -12,6 +12,26 @@ This project is a Deep Learning application designed to classify pediatric chest
 
 To ensure system robustness and handle "Out-of-Distribution" (OOD) anomalies—such as non-medical images or selfies—the architecture was explicitly designed with a third class: `OTHER`. This allows the model to reject invalid data gracefully, directly addressing the "handles errors gracefully" criteria.
 
+### Project Structure
+
+```text
+pneumonia-detector/
+├── data/
+│   ├── test/      # Unseen test set (NORMAL, OTHER, PNEUMONIA)
+│   ├── train/     # Training set
+│   └── val/       # Validation set
+├── src/
+│   ├── dataset.py # Data preprocessing and normalization
+│   ├── evaluate.py# Confusion matrix and performance metrics
+│   ├── model.py   # Custom architecture design
+│   └── train.py   # Training logic, loss, and optimizer
+├── testing_dataset/  # Sample NORMAL / PNEUMONIA / OTHER images for trying the app
+├── app.py         # Functional Streamlit UI
+├── pneumonia_model.pth # Saved model weights
+├── README.md      # Project documentation
+└── requirements.txt
+```
+
 ## How to run the app
 
 The UI is a **Streamlit** app (`app.py`). Run it from the **project root** so `pneumonia_model.pth` and `src/` resolve correctly.
@@ -122,23 +142,4 @@ The model was evaluated against an unseen test dataset of 774 images, achieving 
 **Evaluation Analysis:**
 The model prioritizes **Recall for Pneumonia (97%)**, which is critical in a medical context to ensure infections are not missed. The perfect performance on the `OTHER` class proves the efficacy of the data pipeline and normalization strategy.
 
-## 4. Project Structure
-
-```text
-pneumonia-detector/
-├── data/
-│   ├── test/      # Unseen test set (NORMAL, OTHER, PNEUMONIA)
-│   ├── train/     # Training set
-│   └── val/       # Validation set
-├── src/
-│   ├── dataset.py # Data preprocessing and normalization
-│   ├── evaluate.py# Confusion matrix and performance metrics
-│   ├── model.py   # Custom architecture design
-│   └── train.py   # Training logic, loss, and optimizer
-├── testing_dataset/  # Sample NORMAL / PNEUMONIA / OTHER images for trying the app
-├── app.py         # Functional Streamlit UI
-├── pneumonia_model.pth # Saved model weights
-├── README.md      # Project documentation
-└── requirements.txt
-```
 
